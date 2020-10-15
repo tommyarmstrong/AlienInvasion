@@ -2,6 +2,7 @@ import sys
 from time import sleep
 
 import pygame
+import json
 
 from settings import Settings
 from game_stats import GameStats
@@ -62,6 +63,7 @@ class AlienInvation:
 		"""Respond to keyboard and mouse events"""
 		for event in pygame.event.get():	
 			if event.type == pygame.QUIT:
+				self._write_high_score()
 				sys.exit()
 
 			elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -98,7 +100,6 @@ class AlienInvation:
 			#Hide the mouse pointer
 			pygame.mouse.set_visible(False)
 
-
 	def _check_keydown_events(self, event):
 		"""Respond to key presses"""
 		if event.key == pygame.K_RIGHT:
@@ -106,6 +107,7 @@ class AlienInvation:
 		elif event.key == pygame.K_LEFT:
 			self.ship.moving_left = True
 		elif event.key == pygame.K_q:
+			self._write_high_score()
 			sys.exit()
 		elif event.key == pygame.K_SPACE:
 			self._fire_bullet()
@@ -116,6 +118,13 @@ class AlienInvation:
 			self.ship.moving_right = False
 		elif event.key == pygame.K_LEFT:
 			self.ship.moving_left = False
+
+	def _write_high_score(self):
+		"""Write hgih score to file  so it cn be loaded in future"""
+		high_score = self.stats.high_score
+		persistent_data_file = self.settings.persistent_data_file
+		with open(persistent_data_file, 'w') as f:
+			json.dump(high_score, f)
 
 	def _fire_bullet(self):
 		"""Create a bullet and add to bullets group of sprites"""
@@ -206,7 +215,6 @@ class AlienInvation:
 		for row_number in range(number_rows):
 			for alien_number in range(number_aliens_x):
 				self._create_alien(alien_number, row_number)
-
 
 	def _check_fleet_edges(self):
 		"""Respond if any aliens reach a screen edge"""

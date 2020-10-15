@@ -3,6 +3,9 @@ class Settings:
 
 	def __init__(self):
 		"""Initialize the game's static settings"""
+		#Game settings
+		self.persistent_data_file = "persistent_data.json"
+
 		#Screen settings
 		#Set screen_mode to 'Fullscreen' for fullscreen mode
 		self.screen_mode = 'Window'  
