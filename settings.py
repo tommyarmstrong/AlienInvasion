@@ -17,10 +17,10 @@ class Settings:
 		self.ship_limit = 3
 
 		#Bullet settings
-		self.bullet_width = 300
+		self.bullet_width = 3
 		self.bullet_height = 15
 		self.bullet_color = (60, 60, 60)
-		self.bullets_allowed = 70
+		self.bullets_allowed = 3
 
 		#Alien Settings
 		self.fleet_drop_speed = 10
@@ -35,8 +35,8 @@ class Settings:
 
 	def initialize_dynamic_settings(self):
 		"""Initialize settings that change inside the game"""
-		self.ship_speed = 30
-		self.bullet_speed = 30
+		self.ship_speed = 5
+		self.bullet_speed = 5
 		self.alien_speed = 1.0
 
 		#Scoring

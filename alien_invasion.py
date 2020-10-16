@@ -7,6 +7,7 @@ import json
 from settings import Settings
 from game_stats import GameStats
 from scoreboard import Scoreboard
+from persistent_data import PersistentData
 from button import Button
 from ship import Ship
 from bullet import Bullet 
@@ -30,13 +31,10 @@ class AlienInvation:
 
 		pygame.display.set_caption("Alien Invasion")
 
-		#Create instances to store game statistics
+		#Create objects
+		self.persistent_data = PersistentData(self)
 		self.stats = GameStats(self)
-		#Create a scorebaord
 		self.sb = Scoreboard(self)
-
-
-
 		self.ship = Ship(self)
 		self.bullets = pygame.sprite.Group()
 		self.aliens = pygame.sprite.Group()
@@ -51,7 +49,6 @@ class AlienInvation:
 		"""Start the main loop for the game"""
 		while True:
 			self._check_events()
-
 			if self.stats.game_active:
 				self.ship.update() 
 				self._update_bullets()
@@ -63,8 +60,7 @@ class AlienInvation:
 		"""Respond to keyboard and mouse events"""
 		for event in pygame.event.get():	
 			if event.type == pygame.QUIT:
-				self._write_high_score()
-				sys.exit()
+				self._quit_pygame()
 
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				mouse_pos = pygame.mouse.get_pos()
@@ -107,8 +103,7 @@ class AlienInvation:
 		elif event.key == pygame.K_LEFT:
 			self.ship.moving_left = True
 		elif event.key == pygame.K_q:
-			self._write_high_score()
-			sys.exit()
+			self._quit_pygame()
 		elif event.key == pygame.K_SPACE:
 			self._fire_bullet()
 
@@ -121,10 +116,7 @@ class AlienInvation:
 
 	def _write_high_score(self):
 		"""Write hgih score to file  so it cn be loaded in future"""
-		high_score = self.stats.high_score
-		persistent_data_file = self.settings.persistent_data_file
-		with open(persistent_data_file, 'w') as f:
-			json.dump(high_score, f)
+		
 
 	def _fire_bullet(self):
 		"""Create a bullet and add to bullets group of sprites"""
@@ -152,12 +144,14 @@ class AlienInvation:
 		collisions = pygame.sprite.groupcollide(
 			self.bullets, self.aliens, True, True)
 
-		#Update score
+		#Update score and (if necessary) the high score
 		if collisions:
 			for aliens in collisions.values():
 				self.stats.score += self.settings.alien_points *len(aliens)
+			if self.stats.score > self.stats.high_score:
+				self.stats.high_score = self.stats.score
 			self.sb.prep_score()
-			self.sb.check_high_score()
+			self.sb.prep_high_score()
 
 		#Check if all aliens are destroyed
 		#Destroy existing bullets and create new fleet
@@ -276,6 +270,19 @@ class AlienInvation:
 
 		pygame.display.flip()
 
+	def _save_persistent_data(self):
+		"""Method to update persistent data to dictionary and save as JSON"""
+		self.persistent_data.persistent_data_dictionary['high_score'] = self.stats.high_score
+		self.persistent_data.persistent_data_dictionary['last_score'] = self.stats.score
+
+		persistent_data_file = self.settings.persistent_data_file
+		with open(persistent_data_file, 'w') as f:
+			json.dump(self.persistent_data.persistent_data_dictionary, f)
+
+	def _quit_pygame(self):
+		"""Dump persistent data and quit pygame"""
+		self._save_persistent_data()
+		sys.exit()
 
 
 if __name__ == '__main__':
